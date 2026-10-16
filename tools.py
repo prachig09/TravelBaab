@@ -93,14 +93,39 @@ def query_hinterland_rag(query: str) -> str:
 def live_web_search(query: str) -> str:
     """Search the live web (Tavily if TAVILY_API_KEY is set, else DuckDuckGo) for weather and local events."""
     try:
-        if os.getenv("TAVILY_API_KEY"):
+        api_key = os.getenv("TAVILY_API_KEY")
+        if api_key:
             from langchain_tavily import TavilySearch
-            results = TavilySearch(max_results=3).invoke({"query": query})
-            return "\n".join(f"- {r.get('content', '')[:300]} ({r.get('url', '')})" for r in results)
-        from langchain_community.tools import DuckDuckGoSearchRun
-        return DuckDuckGoSearchRun().invoke(query)[:1200]
-    except Exception as exc:  # network / package problems must not break the graph
-        return f"Live search unavailable right now ({type(exc).__name__}). Check local weather/event listings."
+            
+            # Execute search
+            response = TavilySearch(max_results=3).invoke({"query": query})
+            
+            # Safely parse results list from dictionary response
+            if isinstance(response, dict):
+                results_list = response.get("results", [])
+            elif isinstance(response, list):
+                results_list = response
+            else:
+                results_list = []
 
+            if not results_list:
+                return f"No live search results found for query: {query}"
+
+            formatted = []
+            for r in results_list:
+                if isinstance(r, dict):
+                    content = r.get("content", "")[:300]
+                    url = r.get("url", "")
+                    title = r.get("title", "Result")
+                    formatted.append(f"- **{title}**: {content} ({url})")
+            
+            return "\n".join(formatted) if formatted else str(response)
+
+        # Fallback to DuckDuckGo
+        from langchain_community.tools import DuckDuckGoSearchRun
+        return str(DuckDuckGoSearchRun().invoke(query))[:1200]
+
+    except Exception as exc:  # Network or package issues must not crash the graph
+        return f"Live search unavailable right now ({type(exc).__name__}: {str(exc)}). Check local weather/event listings."
 
 ALL_TOOLS = [get_crowd_density, query_knowledge_graph, query_hinterland_rag, live_web_search]
