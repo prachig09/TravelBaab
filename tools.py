@@ -94,8 +94,8 @@ def live_web_search(query: str) -> str:
     """Search the live web (Tavily if TAVILY_API_KEY is set, else DuckDuckGo) for weather and local events."""
     try:
         if os.getenv("TAVILY_API_KEY"):
-            from langchain_community.tools.tavily_search import TavilySearchResults
-            results = TavilySearchResults(max_results=3).invoke(query)
+            from langchain_tavily import TavilySearch
+            results = TavilySearch(max_results=3).invoke(query)
             return "\n".join(f"- {r.get('content', '')[:300]} ({r.get('url', '')})" for r in results)
         from langchain_community.tools import DuckDuckGoSearchRun
         return DuckDuckGoSearchRun().invoke(query)[:1200]

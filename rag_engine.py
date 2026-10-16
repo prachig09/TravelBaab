@@ -393,7 +393,7 @@ def _get_embeddings() -> Embeddings:
             cleaned_key = gemini_key.strip("'\"")
 
             google_emb = GoogleGenerativeAIEmbeddings(
-                model="text-embedding-001",
+                model="gemini-embedding-2-preview",
                 google_api_key=cleaned_key,
                 task_type="retrieval_document",
             )
