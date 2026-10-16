@@ -1,0 +1,15 @@
+# Environment variables / API Keys
+.env
+.env.local
+
+# Python cache & virtual environment
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Local databases and vector stores
+.chroma/
+*.sqlite3
+
+.chainlit/
