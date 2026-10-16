@@ -95,7 +95,7 @@ def live_web_search(query: str) -> str:
     try:
         if os.getenv("TAVILY_API_KEY"):
             from langchain_tavily import TavilySearch
-            results = TavilySearch(max_results=3).invoke(query)
+            results = TavilySearch(max_results=3).invoke({"query": query})
             return "\n".join(f"- {r.get('content', '')[:300]} ({r.get('url', '')})" for r in results)
         from langchain_community.tools import DuckDuckGoSearchRun
         return DuckDuckGoSearchRun().invoke(query)[:1200]
